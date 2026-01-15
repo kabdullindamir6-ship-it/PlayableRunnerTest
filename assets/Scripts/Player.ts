@@ -1,49 +1,63 @@
-import { _decorator, Component, Node, Vec3, tween, EventTouch, Animation  } from 'cc';
+import { _decorator, Component, Node, Vec3, Animation, Input, input, EventTouch } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('Player')
 export class Player extends Component {
 
     @property
-    jumpHeight:number = 200
+    moveSpeed: number = 200;
+
     @property
-    jumpDuration:number = 0.5
-    @property({ type: Animation })
+    jumpHeight: number = 200;
+
+    @property
+    jumpDuration: number = 0.6;
+
+    @property
     anim: Animation = null!;
 
-    private isJumping = false;
-    
+    private isJumping: boolean = false;
+    private jumpTime: number = 0;
+    private groundY: number = 0;
 
     start() {
-        this.node.parent.on(Node.EventType.TOUCH_START, this.onJump, this);
+        this.groundY = this.node.position.y;
+        input.on(Input.EventType.TOUCH_START, this.onJump, this);
+        this.anim.play('RunPlayer');
     }
 
-    onJump(event: EventTouch){
+    onJump(event: EventTouch) {
         if (this.isJumping) return;
 
         this.isJumping = true;
+        this.jumpTime = 0;
 
         this.anim.play('JumpPlayer');
+    }
 
-        let startPos = this.node.position.clone();
-        let jumpUpPos = new Vec3(startPos.x, startPos.y + this.jumpHeight, startPos.z);
+    update(dt: number) {
 
-        // Поднимаемся
-        tween(this.node)
-            .to(this.jumpDuration / 2, { position: jumpUpPos }, { easing: 'cubicOut' })
-            // Опускаемся
-            .to(this.jumpDuration / 2, { position: startPos }, { easing: 'cubicIn' })
-            .call(() => { 
+        let x = this.node.position.x + this.moveSpeed * dt;
+
+        let y = this.groundY;
+
+        if (this.isJumping) {
+            this.jumpTime += dt;
+            let t = this.jumpTime / this.jumpDuration;
+
+            if (t >= 1) {
+                t = 1;
                 this.isJumping = false;
                 this.anim.play('RunPlayer');
-             })
-            .start();
+            }
 
+            y = this.groundY + 4 * this.jumpHeight * t * (1 - t);
+        }
+
+        this.node.setPosition(x, y, 0);
     }
-    
-    update(deltaTime: number) {
-        
+
+    onDestroy() {
+        input.off(Input.EventType.TOUCH_START, this.onJump, this);
     }
 }
-
-
