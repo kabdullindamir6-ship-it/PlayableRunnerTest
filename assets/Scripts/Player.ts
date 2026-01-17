@@ -1,5 +1,7 @@
 import { _decorator, Component, Node, Vec3, Color, Animation, Input, Sprite, input, EventTouch } from 'cc';
 import { UIManager } from './UIManager';
+import { GameManager } from './GameManager';
+
 const { ccclass, property } = _decorator;
 
 @ccclass('Player')
@@ -34,6 +36,11 @@ export class Player extends Component {
     @property(Node)
     gameOverUI: Node = null!;
 
+    @property({ type: Node })
+    gameManagerNode: Node = null!;
+
+    gameManagerObj: GameManager = null!;
+
     private isJumping: boolean = false;
     private jumpTime: number = 0;
     private groundY: number = 0;
@@ -43,14 +50,22 @@ export class Player extends Component {
     private blinkTimer = 0;
     private blinkInterval = 0.1;
 
+
+    canMove = false;
+    canJump = false;
+
     start() {
         this.groundY = this.node.position.y;
         input.on(Input.EventType.TOUCH_START, this.onJump, this);
         this.anim.play('RunPlayer');
+        if (this.gameManagerNode) {
+            this.gameManagerObj = this.gameManagerNode.getComponent(GameManager);
+        }
     }
 
     takeDamage () {
         if (this.isInvincible) return;
+        if (this.lives < -1) return;
 
         this.lives--;
         console.log('Lives:', this.lives);
@@ -68,10 +83,11 @@ export class Player extends Component {
             });
         }
 
-        if (this.lives <= 0) {
+        if (this.lives == 0) {
             this.die();
         }
 
+        this.gameManagerObj.audioManager.playDamage();
         this.ui.setLives(this.lives);
     }
 
@@ -80,20 +96,23 @@ export class Player extends Component {
         this.moveSpeed = 0;
         this.anim?.stop();
         const gameOverScript = this.gameOverUI.getComponent('GameOverUI');
-        if (gameOverScript) gameOverScript.show();
+        this.gameManagerObj.audioManager.playFail();
+        if (gameOverScript) gameOverScript.show(this.gameManagerObj.score);
     }
 
-    onJump(event: EventTouch) {
+    public onJump(event: EventTouch) {
+        if (!this.canJump || this.gameManagerObj.isPaused) return;
         if (this.isJumping) return;
 
         this.isJumping = true;
         this.jumpTime = 0;
 
         this.anim.play('JumpPlayer');
+        this.gameManagerObj.audioManager.playJump();
     }
 
     update(dt: number) {
-        if (this.isStopped) return;
+        if (this.gameManagerObj.isPaused) return;
 
         let x = this.node.position.x + this.moveSpeed * dt;
 

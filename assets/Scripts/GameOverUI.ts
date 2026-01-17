@@ -16,7 +16,7 @@ export class GameOverUI extends Component {
     @property
     failDuration: number = 2; 
 
-    show() {
+    show(score: number) {
         this.failUI.active = true;
 
         this.failImage.scale = new Vec3(0.5, 0.5, 0.5);
@@ -29,7 +29,7 @@ export class GameOverUI extends Component {
             this.finishUI.active = true;
 
             const finishScript = this.finishUI.getComponent('FinishUI');
-            if (finishScript) finishScript.show(0);
+            if (finishScript) finishScript.show(score);
         }, this.failDuration * 1000);
     }
 }

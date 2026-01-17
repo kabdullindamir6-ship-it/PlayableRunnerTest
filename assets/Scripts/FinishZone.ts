@@ -15,7 +15,7 @@ export class FinishZone extends Component {
 
         if (Math.abs(this.player.position.x - this.node.position.x) < 50) {
             this.gameManager.getComponent('GameManager')?.finishGame();
-            this.node.destroy();
+            this.gameManager.getComponent('GameManager').audioManager.playFinish();
         }
     }
 }

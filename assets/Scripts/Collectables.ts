@@ -30,6 +30,7 @@ export class Collectables extends Component {
             Math.abs(this.player.position.y - this.node.position.y) < 50) {    
             console.log('Added: ', this.value);
             this.gameManager.getComponent('GameManager')?.addScore(this.value);
+            this.gameManager.getComponent('GameManager').audioManager.playCoin();
             this.node.destroy();
         }
     }
