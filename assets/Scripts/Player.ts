@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Vec3, Color, Animation, Input, Sprite, input, EventTouch } from 'cc';
+import { UIManager } from './UIManager';
 const { ccclass, property } = _decorator;
 
 @ccclass('Player')
@@ -21,6 +22,9 @@ export class Player extends Component {
 
     @property
     anim: Animation = null!;
+
+    @property({ type: UIManager })
+    ui: UIManager = null!;
 
     @property(Sprite)
     sprite: Sprite = null!;
@@ -63,6 +67,8 @@ export class Player extends Component {
         if (this.lives <= 0) {
             this.die();
         }
+
+        this.ui.setLives(this.lives);
     }
 
     die () {
