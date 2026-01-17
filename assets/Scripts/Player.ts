@@ -23,11 +23,16 @@ export class Player extends Component {
     @property
     anim: Animation = null!;
 
+    public isStopped = false;
+
     @property({ type: UIManager })
     ui: UIManager = null!;
 
     @property(Sprite)
     sprite: Sprite = null!;
+
+    @property(Node)
+    gameOverUI: Node = null!;
 
     private isJumping: boolean = false;
     private jumpTime: number = 0;
@@ -54,7 +59,6 @@ export class Player extends Component {
         this.invincibleTimer = this.invincibleTime;
         this.blinkTimer = this.blinkInterval;
 
-        // анимация урона
         if (this.anim) {
             this.anim.play('DamagePlayer');
             this.anim.once(Animation.EventType.FINISHED, () => {
@@ -75,6 +79,8 @@ export class Player extends Component {
         console.log('PLAYER DEAD');
         this.moveSpeed = 0;
         this.anim?.stop();
+        const gameOverScript = this.gameOverUI.getComponent('GameOverUI');
+        if (gameOverScript) gameOverScript.show();
     }
 
     onJump(event: EventTouch) {
@@ -87,6 +93,7 @@ export class Player extends Component {
     }
 
     update(dt: number) {
+        if (this.isStopped) return;
 
         let x = this.node.position.x + this.moveSpeed * dt;
 

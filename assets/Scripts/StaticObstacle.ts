@@ -36,7 +36,6 @@ export class StaticObstacle extends Component {
         const playerComp = this.player.getComponent('Player') as any;
         playerComp?.takeDamage();
 
-        // кулдаун чтобы не жрало жизни каждую секунду
         this.scheduleOnce(() => {
             this.canDamage = true;
         }, this.damageCooldown);
