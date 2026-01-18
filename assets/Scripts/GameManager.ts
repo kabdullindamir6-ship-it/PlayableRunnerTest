@@ -52,6 +52,7 @@ export class GameManager extends Component {
     }
     
     finishGame() {
+        this.audioManager.playFinish();
         this.player.isStopped = true;
         this.isPaused = true;
         this.finishUI.active = true;
